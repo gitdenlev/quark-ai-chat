@@ -1,0 +1,15 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+* {
+  font-family: "Outfit", sans-serif;
+}
+
+body {
+  background-color: #191919;
+  color: #fff;
+  font-weight: 400;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
