@@ -13,8 +13,13 @@
         id="userInput"
         placeholder="What do you want to know?"
         rows="1"
+        v-model="inputValue"
       ></textarea>
-      <button class="button">
+      <button
+        class="button"
+        :class="{ 'button--disabled': !isActive }"
+        :disabled="!isActive"
+      >
         <Icon name="fluent:arrow-up-12-filled" size="20" />
       </button>
     </div>
@@ -22,38 +27,26 @@
     <div class="flex items-center justify-start gap-3 w-1/2 flex-wrap px-10">
       <QuarkBadge color="blue" iconName="tabler:language">Translate</QuarkBadge>
 
-      <QuarkBadge color="green" iconName="majesticons:edit-pen-4-line"
-        >Generation Text</QuarkBadge
-      >
+      <QuarkBadge color="green" iconName="majesticons:edit-pen-4-line">
+        Generation Text
+      </QuarkBadge>
 
-      <QuarkBadge color="violet" iconName="fluent:line-style-sketch-16-filled"
-        >Contextual Style</QuarkBadge
-      >
+      <QuarkBadge color="violet" iconName="fluent:line-style-sketch-16-filled">
+        Contextual Style
+      </QuarkBadge>
 
       <QuarkBadge color="orange" iconName="ci:code">Code</QuarkBadge>
 
-      <QuarkBadge color="gray" iconName="pepicons-pencil:clapperboard"
-        >Script Writing</QuarkBadge
-      >
+      <QuarkBadge color="gray" iconName="pepicons-pencil:clapperboard">
+        Script Writing
+      </QuarkBadge>
     </div>
   </main>
 </template>
 
 <script setup lang="ts">
-const items = ref([
-  {
-    label: "Profile",
-    icon: "i-lucide-user",
-  },
-  {
-    label: "Billing",
-    icon: "i-lucide-credit-card",
-  },
-  {
-    label: "Settings",
-    icon: "i-lucide-cog",
-  },
-]);
+import { ref, computed } from "vue";
+
 useHead({
   title: "Quark",
   viewport: "width=device-width, initial-scale=1, maximum-scale=1",
@@ -65,32 +58,12 @@ useHead({
   link: [{ rel: "icon", type: "image/x-icon", href: "/logo.svg" }],
 });
 
-const colorMode = useColorMode();
-console.log(colorMode.preference);
-const value = ref("");
+const inputValue = ref("");
+
+const isActive = computed(() => inputValue.value.trim() !== "");
 </script>
 
 <style scoped>
-h1 {
-  background: linear-gradient(90deg, #d8d8d8, #8c45ff, #d8d8d8);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-size: 200% 100%;
-  animation: gradientAnimation 3s ease-in-out infinite alternate;
-}
-
-@keyframes gradientAnimation {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
 .input__field {
   display: flex;
   align-items: center;
@@ -104,9 +77,19 @@ h1 {
   margin-bottom: 20px;
 }
 
+.light-mode .input__field {
+  background-color: #fff;
+}
+
 .input__field:hover,
 .input__field:focus-within {
   background-color: #444;
+  color: #faf9f7;
+}
+
+.light-mode .input__field:hover,
+.light-mode .input__field:focus-within {
+  background-color: white;
 }
 
 /* Исправленная textarea */
@@ -124,6 +107,15 @@ textarea {
   padding: 8px;
 }
 
+.light-mode textarea {
+  color: #191919;
+  background-color: transparent;
+}
+
+.light-mode textarea::placeholder {
+  color: #19191950;
+}
+
 /* Исправленная кнопка */
 .button {
   min-width: 40px;
@@ -139,16 +131,6 @@ textarea {
   font-size: 20px;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.3s;
-  flex-shrink: 0;
-}
-
-.button:hover {
-  transform: scale(1.05);
-  background-color: #9d5fff;
-}
-
-.button:active {
-  transform: scale(0.95);
 }
 
 .main-center {
@@ -158,5 +140,10 @@ textarea {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+.button--disabled {
+  background-color: gray;
+  cursor: auto;
 }
 </style>

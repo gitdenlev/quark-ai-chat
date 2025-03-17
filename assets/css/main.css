@@ -13,3 +13,9 @@ body {
   flex-direction: column;
   height: 100vh;
 }
+
+
+.light-mode body {
+  background-color: #faf9f7;
+  color: #191919;
+}
