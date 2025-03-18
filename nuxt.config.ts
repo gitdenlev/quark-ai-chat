@@ -9,8 +9,13 @@ export default defineNuxtConfig({
     "@nuxt/image",
     "@nuxt/fonts",
     "@nuxt/ui",
+    "@nuxtjs/i18n",
   ],
+
   vite: {
     plugins: [tailwindcss()],
+  },
+  i18n: {
+    vueI18n: "./i18n.config.ts",
   },
 });

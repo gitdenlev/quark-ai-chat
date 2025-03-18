@@ -1,6 +1,9 @@
 <script setup lang="ts">
 const colorMode = useColorMode();
 const activeMode = ref(colorMode.preference);
+const { setLocale, locale } = useI18n(); // Додаємо locale
+
+const selectedLocale = ref(locale.value); // Додаємо стан для вибраної мови
 
 const toggleDarkMode = () => {
   colorMode.preference = colorMode.value === "dark" ? "light" : "dark";
@@ -20,6 +23,11 @@ const setDarkMode = () => {
   colorMode.preference = "dark";
   activeMode.value = "dark";
 };
+
+const changeLocale = (newLocale: string) => {
+  setLocale(newLocale);
+  selectedLocale.value = newLocale;
+};
 </script>
 
 <template>
@@ -34,14 +42,9 @@ const setDarkMode = () => {
         align: 'end',
         side: 'bottom',
         sideOffset: 12,
-        class: 'popover-custom',
       }"
     >
-      <Icon
-        class="hover:rotate-45 cursor-pointer transition-all duration-300"
-        name="bi:gear-wide-connected"
-        size="25"
-      />
+      <Icon class="cursor-pointer" name="bi:gear-wide-connected" size="25" />
 
       <template #content>
         <div
@@ -84,10 +87,35 @@ const setDarkMode = () => {
               class="relative flex items-center gap-2 rounded-3xl p-2 w-full text-gray-700"
             >
               <Icon name="material-symbols-light:language" size="25" />
-              <span class="text-lg">Language</span>
-              <div class="ml-auto flex items-center gap-1 text-xs">
-                <UKbd value="Shift + L" size="xs" />
-              </div>
+              <UModal>
+                <span class="text-lg">Language</span>
+
+                <template #content>
+                  <div class="flex flex-col gap-3 p-4">
+                    <div
+                      @click="changeLocale('en')"
+                      class="flex items-center justify-between text-black hover:bg-gray-100 p-2 rounded-md select-none cursor-pointer"
+                      :class="{ 'active-locale': selectedLocale === 'en' }"
+                    >
+                      <span class="flex items-center gap-2"
+                        ><Icon name="circle-flags:uk" />English</span
+                      >
+                      <span class="text-gray-700">English</span>
+                    </div>
+
+                    <div
+                      @click="changeLocale('uk')"
+                      class="flex items-center justify-between text-black hover:bg-gray-100 p-2 rounded-md select-none cursor-pointer"
+                      :class="{ 'active-locale': selectedLocale === 'uk' }"
+                    >
+                      <span class="flex items-center gap-2"
+                        ><Icon name="circle-flags:lang-uk" />Українська</span
+                      >
+                      <span class="text-gray-700">Ukrainian</span>
+                    </div>
+                  </div>
+                </template>
+              </UModal>
             </div>
           </div>
         </div>
@@ -102,6 +130,14 @@ const setDarkMode = () => {
 }
 
 .dark .active {
+  background-color: #3f3f3f;
+}
+
+.active-locale {
+  background-color: #e0e0e0;
+}
+
+.dark .active-locale {
   background-color: #3f3f3f;
 }
 </style>

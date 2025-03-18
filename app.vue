@@ -3,15 +3,15 @@
   <main
     class="flex flex-col justify-center items-center flex-1 text-center main-center"
   >
-    <h1 class="text-[40px] font-[400] mb-[10px]">Welcome to Quark.</h1>
-    <p class="text-[20px] mb-[30px]">How can I help you today?</p>
+    <h1 class="text-[40px] font-[400] mb-[10px]">{{ t("home__title") }}</h1>
+    <p class="text-[20px] mb-[30px]">{{ t("home__description") }}</p>
 
     <div id="chatBox"></div>
 
     <div class="input__field">
       <textarea
         id="userInput"
-        placeholder="What do you want to know?"
+        :placeholder="t('home__placeholder')"
         rows="1"
         v-model="inputValue"
       ></textarea>
@@ -25,38 +25,65 @@
     </div>
 
     <div class="flex items-center justify-start gap-3 w-1/2 flex-wrap px-10">
-      <QuarkBadge color="blue" iconName="tabler:language">Translate</QuarkBadge>
+      <QuarkBadge
+        color="oklch(0.488 0.243 264.376)"
+        bgColor="oklch(0.932 0.032 255.585)"
+        iconName="tabler:language"
+        >{{ t("translate__badge") }}</QuarkBadge
+      >
 
-      <QuarkBadge color="green" iconName="majesticons:edit-pen-4-line">
-        Generation Text
+      <QuarkBadge
+        color="oklch(0.491 0.27 292.581)"
+        bgColor="oklch(0.943 0.029 294.588)"
+        iconName="fluent:line-style-sketch-16-filled"
+      >
+        {{ t("contextual__badge") }}
       </QuarkBadge>
 
-      <QuarkBadge color="violet" iconName="fluent:line-style-sketch-16-filled">
-        Contextual Style
+      <QuarkBadge
+        color="oklch(0.527 0.154 150.069)"
+        bgColor="oklch(0.962 0.044 156.743)"
+        iconName="majesticons:edit-pen-4-line"
+      >
+        {{ t("generation__badge") }}
       </QuarkBadge>
 
-      <QuarkBadge color="orange" iconName="ci:code">Code</QuarkBadge>
+      <QuarkBadge
+        color="oklch(0.554 0.135 66.442)"
+        bgColor="oklch(0.973 0.071 103.193)"
+        iconName="mage:book"
+      >
+        {{ t("education__badge") }}
+      </QuarkBadge>
 
-      <QuarkBadge color="gray" iconName="pepicons-pencil:clapperboard">
-        Script Writing
+      <QuarkBadge
+        color="oklch(0.505 0.213 27.518)"
+        bgColor="oklch(0.936 0.032 17.717)"
+        iconName="ci:code"
+        >{{ t("code__badge") }}</QuarkBadge
+      >
+      <QuarkBadge
+        color="oklch(0.373 0.034 259.733)"
+        bgColor="oklch(0.967 0.003 264.542)"
+        iconName="mdi:clapperboard"
+      >
+        {{ t("script__badge") }}
       </QuarkBadge>
     </div>
   </main>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
-
 useHead({
   title: "Quark",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
-  charset: "utf-8",
   meta: [
     { name: "viewport", content: "width=device-width, initial-scale=1" },
     { name: "description", content: "Quark" },
   ],
   link: [{ rel: "icon", type: "image/x-icon", href: "/logo.svg" }],
 });
+
+const { t } = useI18n();
 
 const inputValue = ref("");
 

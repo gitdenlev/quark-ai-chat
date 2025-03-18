@@ -1,17 +1,22 @@
 <script setup lang="ts">
+const hover = ref(false);
 const props = defineProps({
   iconName: String,
   color: String,
+  bgColor: String,
 });
 </script>
 
 <template>
   <div
     class="select-none cursor-pointer inline-flex items-center px-3 py-1 rounded-full gap-1 my-2 transform-gpu transition-all duration-200"
-    :class="[`bg-${props.color}-100`, `text-${props.color}-700`]"
-    :hover="{
-      backgroundColor: `bg-${props.color}-50)`,
+    :style="{
+      color: props.color,
+      backgroundColor: props.bgColor,
+      filter: hover ? 'opacity(80%)' : 'opacity(100%)',
     }"
+    @mouseover="hover = true"
+    @mouseleave="hover = false"
   >
     <Icon :name="props.iconName" size="25" />
     <span class="whitespace-nowrap">
@@ -24,9 +29,5 @@ const props = defineProps({
 .transform-gpu {
   will-change: transform;
   transform: translateZ(0);
-}
-
-div:hover {
-  filter: opacity(80%);
 }
 </style>
