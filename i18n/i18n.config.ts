@@ -13,6 +13,7 @@ export default defineI18nConfig(() => ({
       code__badge: "Code",
       script__badge: "Script Writing",
       lang__btn: "Language",
+      ai__think: "Thinking...",
     },
     uk: {
       home__title: "Ласкаво просимо у Quark.",
@@ -25,6 +26,7 @@ export default defineI18nConfig(() => ({
       code__badge: "Код",
       script__badge: "Сценарій",
       lang__btn: "Мова",
+      ai__think: "Думаю...",
     },
   },
 }));

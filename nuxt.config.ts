@@ -5,7 +5,7 @@ export default defineNuxtConfig({
   css: ["~/assets/css/main.css"],
   runtimeConfig: {
     public: {
-      geminiApiKey: process.env.NUXT_PUBLIC_GEMINI_API_KEY
+      geminiApiKey: process.env.NUXT_PUBLIC_GEMINI_API_KEY,
     },
   },
   modules: [
@@ -15,6 +15,7 @@ export default defineNuxtConfig({
     "@nuxt/fonts",
     "@nuxt/ui",
     "@nuxtjs/i18n",
+    "@nuxthub/core",
   ],
 
   vite: {
