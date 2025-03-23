@@ -55,22 +55,22 @@
         <!-- Випадаючий список для мобільних пристроїв -->
         <div class="block md:hidden w-full px-4">
           <div class="mobile-badges-container">
-            <button 
-              @click="toggleMobileBadges" 
+            <button
+              @click="toggleMobileBadges"
               class="mobile-badges-toggle"
               :class="{ 'is-active': isMobileBadgesVisible }"
             >
-              <Icon 
-                name="i-lucide-chevron-down" 
-                size="20" 
+              <Icon
+                name="i-lucide-chevron-down"
+                size="20"
                 class="transition-transform duration-300"
                 :class="{ 'rotate-180': isMobileBadgesVisible }"
               />
             </button>
 
-            <div 
+            <div
               class="mobile-badges-content"
-              :class="{ 'visible': isMobileBadgesVisible }"
+              :class="{ visible: isMobileBadgesVisible }"
             >
               <div class="flex flex-wrap gap-3 p-4">
                 <QuarkBadge
@@ -80,33 +80,18 @@
                   :bgColor="badge.bgColor"
                   :iconName="badge.iconName"
                   class="mobile-badge"
-                  :style="{ 
+                  :style="{
                     animationDelay: `${index * 0.05}s`,
                     opacity: isMobileBadgesVisible ? 1 : 0,
-                    transform: isMobileBadgesVisible ? 'translateY(0)' : 'translateY(10px)'
+                    transform: isMobileBadgesVisible
+                      ? 'translateY(0)'
+                      : 'translateY(10px)',
                   }"
                 >
                   {{ t(badge.translationKey) }}
                 </QuarkBadge>
               </div>
             </div>
-          </div>
-        </div>
-
-        <!-- Звичайне відображення для десктопу -->
-        <div class="hidden md:block">
-          <div
-            class="flex items-center justify-center gap-3 flex-wrap md:gap-4"
-          >
-            <QuarkBadge
-              v-for="badge in badges"
-              :key="badge.translationKey"
-              :color="badge.color"
-              :bgColor="badge.bgColor"
-              :iconName="badge.iconName"
-            >
-              {{ t(badge.translationKey) }}
-            </QuarkBadge>
           </div>
         </div>
       </div>
@@ -136,6 +121,22 @@
           >
             <Icon name="ri:apps-2-ai-line" size="25" />
           </button>
+        </div>
+      </div>
+      <!-- Звичайне відображення для десктопу -->
+      <div class="hidden md:block">
+        <div
+          class="flex items-center justify-center gap-5 w-full flex-wrap mt-6 xl:w-s xl:px-4 md:mx-auto"
+        >
+          <QuarkBadge
+            v-for="badge in badges"
+            :key="badge.translationKey"
+            :color="badge.color"
+            :bgColor="badge.bgColor"
+            :iconName="badge.iconName"
+          >
+            {{ t(badge.translationKey) }}
+          </QuarkBadge>
         </div>
       </div>
     </div>
@@ -297,8 +298,8 @@ const fetchAIResponse = async (userMessage: string) => {
 const handleClickOutside = (event: MouseEvent) => {
   const target = event.target as HTMLElement;
   if (
-    isMobileBadgesVisible.value && 
-    !target.closest('.mobile-badges-container')
+    isMobileBadgesVisible.value &&
+    !target.closest(".mobile-badges-container")
   ) {
     isMobileBadgesVisible.value = false;
   }
@@ -310,9 +311,9 @@ onMounted(() => {
   if (textarea.value) {
     textarea.value.focus();
   }
-  
+
   // Додаємо обробник для закриття бейджів при кліку за межами контейнера
-  document.addEventListener('click', handleClickOutside);
+  document.addEventListener("click", handleClickOutside);
 });
 </script>
 
@@ -321,7 +322,7 @@ onMounted(() => {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  min-height: 100vh;
+  min-height: calc(100vh - 80px);
   transition: all 0.5s ease;
   position: relative;
 }
@@ -360,8 +361,9 @@ onMounted(() => {
   opacity: 1;
   transform: translateY(0);
   animation: slideIn 0.5s forwards;
-  position: fixed;
   top: 80px;
+  position: absolute; /* Або relative */
+  max-height: calc(100vh - 80px - 100px);
 }
 
 .chat-hidden {
@@ -555,12 +557,6 @@ textarea::placeholder {
   padding: 0 16px;
 }
 
-
-
-
-
-
-
 .badge-button-text {
   flex-grow: 1;
   text-align: center;
@@ -580,16 +576,10 @@ textarea::placeholder {
   transform: translateY(10px);
 }
 
-.light-mode .mobile-badges-content {
-  background-color: rgba(255, 255, 255, 0.9);
-  border-color: rgba(0, 0, 0, 0.1);
-}
-
 .mobile-badges-content.visible {
   max-height: 300px;
   opacity: 1;
   transform: translateY(0);
-  box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .mobile-badge {
