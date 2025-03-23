@@ -47,14 +47,78 @@
     </div>
 
     <!-- Інтерактивна частина (поле вводу + бейджі) -->
-    <div class="input-section w-full flex flex-col items-center justify-center">
+    <div
+      class="input-section w-full flex flex-col items-center justify-between md:justify-center"
+    >
+      <!-- Бейджі можливостей -->
+      <div v-if="!showChatBox" class="w-full max-w-4xl mx-auto mb-20 md:mb-0">
+        <!-- Випадаючий список для мобільних пристроїв -->
+        <div class="block md:hidden w-full px-4">
+          <div class="mobile-badges-container">
+            <button 
+              @click="toggleMobileBadges" 
+              class="mobile-badges-toggle"
+              :class="{ 'is-active': isMobileBadgesVisible }"
+            >
+              <Icon 
+                name="i-lucide-chevron-down" 
+                size="20" 
+                class="transition-transform duration-300"
+                :class="{ 'rotate-180': isMobileBadgesVisible }"
+              />
+            </button>
+
+            <div 
+              class="mobile-badges-content"
+              :class="{ 'visible': isMobileBadgesVisible }"
+            >
+              <div class="flex flex-wrap gap-3 p-4">
+                <QuarkBadge
+                  v-for="(badge, index) in badges"
+                  :key="badge.translationKey"
+                  :color="badge.color"
+                  :bgColor="badge.bgColor"
+                  :iconName="badge.iconName"
+                  class="mobile-badge"
+                  :style="{ 
+                    animationDelay: `${index * 0.05}s`,
+                    opacity: isMobileBadgesVisible ? 1 : 0,
+                    transform: isMobileBadgesVisible ? 'translateY(0)' : 'translateY(10px)'
+                  }"
+                >
+                  {{ t(badge.translationKey) }}
+                </QuarkBadge>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Звичайне відображення для десктопу -->
+        <div class="hidden md:block">
+          <div
+            class="flex items-center justify-center gap-3 flex-wrap md:gap-4"
+          >
+            <QuarkBadge
+              v-for="badge in badges"
+              :key="badge.translationKey"
+              :color="badge.color"
+              :bgColor="badge.bgColor"
+              :iconName="badge.iconName"
+            >
+              {{ t(badge.translationKey) }}
+            </QuarkBadge>
+          </div>
+        </div>
+      </div>
+
       <!-- Поле введення тексту -->
       <div
-        class="input__field-container"
-        :class="{ 'fixed-input': showChatBox }"
+        class="input__field-container fixed bottom-5 left-0 right-0 md:relative md:bottom-auto"
+        :class="{ 'md:fixed md:bottom-5': showChatBox }"
       >
-        <div class="input__field w-full md:w-[600px]">
+        <div class="input__field w-full md:w-[600px] mx-auto">
           <textarea
+            class="text-md md:text-lg"
             id="userInput"
             :placeholder="t('home__placeholder')"
             rows="1"
@@ -64,67 +128,14 @@
             ref="textarea"
           ></textarea>
           <button
-            class="button"
+            class="button w-8 h-8 md:w-8 md:h-8"
             :class="{ 'button--disabled': !isActive }"
             :disabled="!isActive"
             @click="sendMessage"
             aria-label="Send message"
           >
-            <Icon name="fluent:arrow-up-12-filled" size="20" />
+            <Icon name="ri:apps-2-ai-line" size="25" />
           </button>
-        </div>
-      </div>
-
-      <!-- Бейджі можливостей (показуються тільки в неактивному режимі) -->
-      <div
-        class="badges-container transition-all duration-500 mt-6"
-        v-if="!showChatBox"
-      >
-        <div
-          class="flex items-center justify-center gap-3 w-full flex-wrap md:gap-4"
-        >
-          <QuarkBadge
-            color="oklch(0.488 0.243 264.376)"
-            bgColor="oklch(0.932 0.032 255.585)"
-            iconName="tabler:language"
-          >
-            {{ t("translate__badge") }}
-          </QuarkBadge>
-          <QuarkBadge
-            color="oklch(0.491 0.27 292.581)"
-            bgColor="oklch(0.943 0.029 294.588)"
-            iconName="fluent:line-style-sketch-16-filled"
-          >
-            {{ t("contextual__badge") }}
-          </QuarkBadge>
-          <QuarkBadge
-            color="oklch(0.527 0.154 150.069)"
-            bgColor="oklch(0.962 0.044 156.743)"
-            iconName="majesticons:edit-pen-4-line"
-          >
-            {{ t("generation__badge") }}
-          </QuarkBadge>
-          <QuarkBadge
-            color="oklch(0.554 0.135 66.442)"
-            bgColor="oklch(0.973 0.071 103.193)"
-            iconName="mage:book"
-          >
-            {{ t("education__badge") }}
-          </QuarkBadge>
-          <QuarkBadge
-            color="oklch(0.505 0.213 27.518)"
-            bgColor="oklch(0.936 0.032 17.717)"
-            iconName="ci:code"
-          >
-            {{ t("code__badge") }}
-          </QuarkBadge>
-          <QuarkBadge
-            color="oklch(0.373 0.034 259.733)"
-            bgColor="oklch(0.967 0.003 264.542)"
-            iconName="mdi:clapperboard"
-          >
-            {{ t("script__badge") }}
-          </QuarkBadge>
         </div>
       </div>
     </div>
@@ -132,7 +143,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, onMounted } from "vue";
+import { ref, computed, nextTick, onMounted, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRuntimeConfig, useHead } from "#imports";
 
@@ -155,11 +166,56 @@ const showChatBox = ref(false);
 const chatBox = ref<HTMLElement | null>(null);
 const textarea = ref<HTMLTextAreaElement | null>(null);
 const messages = ref<{ text: string; type: "user" | "bot" }[]>([]);
+const isMobileBadgesVisible = ref(false);
 
 const config = useRuntimeConfig().public;
 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${config.geminiApiKey}`;
 
 const isActive = computed(() => inputValue.value.trim() !== "");
+
+const badges = [
+  {
+    color: "oklch(0.488 0.243 264.376)",
+    bgColor: "oklch(0.932 0.032 255.585)",
+    iconName: "tabler:language",
+    translationKey: "translate__badge",
+  },
+  {
+    color: "oklch(0.491 0.27 292.581)",
+    bgColor: "oklch(0.943 0.029 294.588)",
+    iconName: "fluent:line-style-sketch-16-filled",
+    translationKey: "contextual__badge",
+  },
+  {
+    color: "oklch(0.527 0.154 150.069)",
+    bgColor: "oklch(0.962 0.044 156.743)",
+    iconName: "majesticons:edit-pen-4-line",
+    translationKey: "generation__badge",
+  },
+  {
+    color: "oklch(0.554 0.135 66.442)",
+    bgColor: "oklch(0.973 0.071 103.193)",
+    iconName: "mage:book",
+    translationKey: "education__badge",
+  },
+  {
+    color: "oklch(0.505 0.213 27.518)",
+    bgColor: "oklch(0.936 0.032 17.717)",
+    iconName: "ci:code",
+    translationKey: "code__badge",
+  },
+  {
+    color: "oklch(0.373 0.034 259.733)",
+    bgColor: "oklch(0.967 0.003 264.542)",
+    iconName: "mdi:clapperboard",
+    translationKey: "script__badge",
+  },
+];
+
+// Функція для відкриття/закриття мобільного контейнера з бейджиками
+const toggleMobileBadges = () => {
+  isMobileBadgesVisible.value = !isMobileBadgesVisible.value;
+};
 
 // Автоматичне підлаштування висоти текстового поля
 const autoResize = () => {
@@ -237,12 +293,26 @@ const fetchAIResponse = async (userMessage: string) => {
   });
 };
 
+// Закриття мобільного контейнера з бейджиками при кліку за його межами
+const handleClickOutside = (event: MouseEvent) => {
+  const target = event.target as HTMLElement;
+  if (
+    isMobileBadgesVisible.value && 
+    !target.closest('.mobile-badges-container')
+  ) {
+    isMobileBadgesVisible.value = false;
+  }
+};
+
 // Ініціалізація при монтуванні компонента
 onMounted(() => {
   // Фокус на полі введення при завантаженні сторінки
   if (textarea.value) {
     textarea.value.focus();
   }
+  
+  // Додаємо обробник для закриття бейджів при кліку за межами контейнера
+  document.addEventListener('click', handleClickOutside);
 });
 </script>
 
@@ -304,25 +374,17 @@ onMounted(() => {
   width: 100%;
   display: flex;
   justify-content: center;
-  padding: 0 20px;
   transition: all 0.5s ease;
   z-index: 100;
-}
-
-.fixed-input {
-  position: fixed;
-  bottom: 20px;
-  left: 0;
-  right: 0;
-  animation: slideUp 0.5s forwards;
+  padding: 0 10px;
 }
 
 .input__field {
   display: flex;
   align-items: center;
-  max-width: 600px;
-  padding: 12px 15px;
-  border-radius: 15px;
+  justify-content: space-between;
+  padding: 12px;
+  border-radius: 30px;
   background-color: rgba(51, 51, 51, 0.85);
   backdrop-filter: blur(10px);
   transition: all 0.3s;
@@ -349,7 +411,6 @@ onMounted(() => {
 textarea {
   background-color: transparent;
   color: #fff;
-  font-size: 18px;
   outline: none;
   resize: none;
   border: none;
@@ -358,6 +419,10 @@ textarea {
   line-height: 1.5;
   max-height: 120px;
   overflow-y: auto;
+  color: #faf9f7;
+}
+
+.light-mode textarea {
   color: #ffffff8c;
 }
 
@@ -373,10 +438,7 @@ textarea::placeholder {
   color: #191919;
 }
 
-
 .button {
-  min-width: 42px;
-  height: 42px;
   border-radius: 50%;
   background-color: #a65fff;
   color: #fff;
@@ -388,8 +450,30 @@ textarea::placeholder {
   flex-shrink: 0;
 }
 
+/* Адаптивні розміри для різних екранів */
+@media (min-width: 640px) {
+  .button {
+    min-width: 36px;
+    height: 36px;
+  }
+}
+
+@media (min-width: 768px) {
+  .button {
+    min-width: 38px;
+    height: 38px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .button {
+    min-width: 42px;
+    height: 42px;
+  }
+}
+
 .button--disabled {
-  background-color: #666;
+  background-color: #6666669a;
   cursor: auto;
   transform: none;
 }
@@ -413,6 +497,7 @@ textarea::placeholder {
 
 .message.bot {
   margin-right: auto;
+  word-wrap: wrap;
 }
 
 .message-content {
@@ -438,7 +523,6 @@ textarea::placeholder {
   background-color: rgba(51, 51, 51, 0.7);
   backdrop-filter: blur(5px);
   border-top-left-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .light-mode .bot .message-content {
@@ -458,6 +542,60 @@ textarea::placeholder {
   margin-top: 24px;
   width: 100%;
   max-width: 700px;
+}
+
+/* Новий стиль для мобільного контейнера з бейджиками */
+.mobile-badges-container {
+  position: fixed;
+  bottom: 100px;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 90;
+  padding: 0 16px;
+}
+
+
+
+
+
+
+
+.badge-button-text {
+  flex-grow: 1;
+  text-align: center;
+}
+
+.mobile-badges-content {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  padding: 0 20px;
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.4s linear;
+  margin-bottom: 8px;
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.light-mode .mobile-badges-content {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.mobile-badges-content.visible {
+  max-height: 300px;
+  opacity: 1;
+  transform: translateY(0);
+  box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-badge {
+  transition: all 0.3s ease;
+  opacity: 0;
+  transform: translateY(10px);
 }
 
 /* Анімації */
@@ -533,6 +671,13 @@ textarea::placeholder {
 
   .message {
     max-width: 90%;
+  }
+}
+
+/* Оновіть медіа-запити */
+@media (max-width: 768px) {
+  .main-container {
+    padding-bottom: 100px; /* Місце для зафіксованого поля введення */
   }
 }
 </style>
