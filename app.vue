@@ -23,24 +23,33 @@
     <div
       id="chatBox"
       ref="chatBox"
-      class="w-full md:w-[600px] max-h-[65vh] chat-container transition-all duration-500"
+      class="w-full md:w-[600px] chat-container transition-all duration-500 overflow-y-auto"
       :class="{ 'chat-visible': showChatBox, 'chat-hidden': !showChatBox }"
     >
-      <div
-        v-for="(msg, index) in messages"
-        :key="index"
-        class="message-wrapper"
-        :style="{ animationDelay: `${index * 0.12}s` }"
-      >
-        <div :class="['message', msg.type]">
-          <div class="message-content">
-            <img
-              v-if="msg.type === 'bot'"
-              src="/logo.svg"
-              alt="AI Logo"
-              class="ai-logo"
-            />
-            <span class="text-xl message-text">{{ msg.text }}</span>
+      <div class="chat-messages-wrapper">
+        <div
+          v-for="(msg, index) in messages"
+          :key="index"
+          class="message-wrapper"
+          :style="{ animationDelay: `${index * 0.12}s` }"
+        >
+          <div :class="['message', msg.type]">
+            <div class="message-content">
+              <img
+                v-if="msg.type === 'bot'"
+                src="/logo.svg"
+                alt="AI Logo"
+                class="ai-logo"
+              />
+              <span v-if="msg.type === 'user'" class="text-xl message-text">{{
+                msg.text
+              }}</span>
+              <span
+                v-else
+                class="text-xl message-text"
+                v-html="msg.html || msg.text"
+              ></span>
+            </div>
           </div>
         </div>
       </div>
@@ -94,14 +103,31 @@
             </div>
           </div>
         </div>
+
+        <!-- Десктопні бейджі - тепер з умовою відображення -->
+        <div class="hidden md:block">
+          <div
+            class="flex items-center justify-center gap-5 w-full flex-wrap mt-6 xl:w-s xl:px-4 md:mx-auto"
+          >
+            <QuarkBadge
+              v-for="badge in badges"
+              :key="badge.translationKey"
+              :color="badge.color"
+              :bgColor="badge.bgColor"
+              :iconName="badge.iconName"
+            >
+              {{ t(badge.translationKey) }}
+            </QuarkBadge>
+          </div>
+        </div>
       </div>
 
       <!-- Поле введення тексту -->
       <div
-        class="input__field-container fixed bottom-5 left-0 right-0 md:relative md:bottom-auto"
+        class="input__field-container fixed bottom-5 left-0 right-0 md:relative md:bottom-auto w-full lg:w-2/3 xl:w-1/2 mx-auto"
         :class="{ 'md:fixed md:bottom-5': showChatBox }"
       >
-        <div class="input__field w-full md:w-[600px] mx-auto">
+        <div class="input__field w-full xl:w-[500px] md:w-[600px] mx-auto">
           <textarea
             class="text-md md:text-lg"
             id="userInput"
@@ -123,22 +149,6 @@
           </button>
         </div>
       </div>
-      <!-- Звичайне відображення для десктопу -->
-      <div class="hidden md:block">
-        <div
-          class="flex items-center justify-center gap-5 w-full flex-wrap mt-6 xl:w-s xl:px-4 md:mx-auto"
-        >
-          <QuarkBadge
-            v-for="badge in badges"
-            :key="badge.translationKey"
-            :color="badge.color"
-            :bgColor="badge.bgColor"
-            :iconName="badge.iconName"
-          >
-            {{ t(badge.translationKey) }}
-          </QuarkBadge>
-        </div>
-      </div>
     </div>
   </main>
 </template>
@@ -147,6 +157,7 @@
 import { ref, computed, nextTick, onMounted, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRuntimeConfig, useHead } from "#imports";
+import { marked } from "marked";
 
 // SEO
 useHead({
@@ -166,7 +177,9 @@ const inputValue = ref("");
 const showChatBox = ref(false);
 const chatBox = ref<HTMLElement | null>(null);
 const textarea = ref<HTMLTextAreaElement | null>(null);
-const messages = ref<{ text: string; type: "user" | "bot" }[]>([]);
+const messages = ref<{ text: string; type: "user" | "bot"; html?: string }[]>(
+  []
+);
 const isMobileBadgesVisible = ref(false);
 
 const config = useRuntimeConfig().public;
@@ -262,7 +275,17 @@ const sendMessage = async () => {
   fetchAIResponse(userMessage);
 };
 
-// Запит до API для отримання відповіді
+// Функція для форматування Markdown
+const formatMarkdown = (text: string): string => {
+  marked.setOptions({
+    breaks: true,
+    gfm: true,
+    sanitize: true,
+  });
+  return marked.parse(text);
+};
+
+// Оновлюємо функцію fetchAIResponse
 const fetchAIResponse = async (userMessage: string) => {
   const data = { contents: [{ parts: [{ text: userMessage }] }] };
 
@@ -280,7 +303,12 @@ const fetchAIResponse = async (userMessage: string) => {
       result.candidates?.[0]?.content?.parts?.[0]?.text ||
       "Sorry, I didn't get that.";
 
-    messages.value[messages.value.length - 1].text = aiResponse;
+    // Форматуємо відповідь і зберігаємо HTML
+    messages.value[messages.value.length - 1] = {
+      text: aiResponse,
+      type: "bot",
+      html: formatMarkdown(aiResponse),
+    };
   } catch (error) {
     console.error("Помилка:", error);
     messages.value[messages.value.length - 1].text =
@@ -314,10 +342,31 @@ onMounted(() => {
 
   // Додаємо обробник для закриття бейджів при кліку за межами контейнера
   document.addEventListener("click", handleClickOutside);
+
+  // Забезпечуємо правильний скролінг на iOS та інших мобільних пристроях
+  document.body.style.overflow = "auto";
+  document.documentElement.style.overflow = "auto";
+  document.body.style.height = "auto";
+  document.documentElement.style.height = "auto";
 });
 </script>
 
 <style scoped>
+/* Глобальні виправлення для запобігання небажаним скролам */
+:root {
+  overflow-x: hidden;
+}
+
+body,
+html {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  height: auto;
+  width: 100%;
+}
+
 .main-container {
   width: 100%;
   max-width: 1200px;
@@ -325,6 +374,7 @@ onMounted(() => {
   min-height: calc(100vh - 80px);
   transition: all 0.5s ease;
   position: relative;
+  overflow-x: hidden;
 }
 
 .chat-active {
@@ -340,16 +390,18 @@ onMounted(() => {
 
 .chat-container {
   border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 24px;
-  overflow-y: auto;
   scrollbar-width: thin;
   position: relative;
+  height: auto;
+  width: 100%;
 }
 
-.chat-container::-webkit-scrollbar {
-  width: 6px;
+.chat-messages-wrapper {
+  width: 100%;
+  height: auto;
 }
+
+
 
 .chat-container::-webkit-scrollbar-thumb {
   background-color: rgba(255, 255, 255, 0.2);
@@ -361,9 +413,9 @@ onMounted(() => {
   opacity: 1;
   transform: translateY(0);
   animation: slideIn 0.5s forwards;
-  top: 80px;
-  position: absolute; /* Або relative */
-  max-height: calc(100vh - 80px - 100px);
+  position: relative;
+  margin-top: 20px;
+  margin-bottom: 90px;
 }
 
 .chat-hidden {
@@ -373,12 +425,11 @@ onMounted(() => {
 }
 
 .input__field-container {
-  width: 100%;
   display: flex;
   justify-content: center;
   transition: all 0.5s ease;
   z-index: 100;
-  padding: 0 10px;
+  padding: 0 10px;  
 }
 
 .input__field {
@@ -393,6 +444,7 @@ onMounted(() => {
   border: 2px solid rgba(255, 255, 255, 0.1);
   width: 100%;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
 }
 
 .input__field:focus-within {
@@ -522,14 +574,11 @@ textarea::placeholder {
 }
 
 .bot .message-content {
-  background-color: rgba(51, 51, 51, 0.7);
   backdrop-filter: blur(5px);
   border-top-left-radius: 4px;
 }
 
 .light-mode .bot .message-content {
-  background-color: rgba(240, 240, 240, 0.9);
-  border: 1px solid rgba(0, 0, 0, 0.1);
   color: #333;
 }
 
@@ -651,8 +700,7 @@ textarea::placeholder {
 /* Адаптивні стилі для мобільних пристроїв */
 @media (max-width: 640px) {
   .chat-container {
-    top: 70px;
-    max-height: 60vh;
+    max-height: 65vh;
   }
 
   .fixed-input {
@@ -664,10 +712,115 @@ textarea::placeholder {
   }
 }
 
-/* Оновіть медіа-запити */
+/* Оновлені медіа-запити */
 @media (max-width: 768px) {
   .main-container {
     padding-bottom: 100px; /* Місце для зафіксованого поля введення */
+  }
+
+  .chat-visible {
+    margin-bottom: 70px;
+  }
+}
+
+/* Додаємо стилі для форматованого тексту */
+:deep(.message-text) {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: 1em 0 0.5em;
+    font-weight: 500;
+  }
+
+  h1 {
+    font-size: 1.5em;
+  }
+  h2 {
+    font-size: 1.3em;
+  }
+  h3 {
+    font-size: 1.2em;
+  }
+
+  p {
+    margin: 0.5em 0;
+  }
+
+  code {
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: monospace;
+  }
+
+  pre {
+    background-color: #282c34;
+    padding: 1em;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 1em 0;
+    color: #ffffff;
+  }
+
+  ul,
+  ol {
+    padding-left: 1.5em;
+    margin: 0.5em 0;
+  }
+
+  ul {
+    list-style-type: disc;
+  }
+
+  ol {
+    list-style-type: decimal;
+  }
+
+  a {
+    color: #a65fff;
+    text-decoration: underline;
+  }
+
+  blockquote {
+    border-left: 3px solid #a65fff;
+    padding-left: 1em;
+    margin: 1em 0;
+    font-style: italic;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* Додаткові стилі для світлої теми */
+.light-mode :deep(.message-text) {
+  code,
+  pre {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Додаємо стилі для фіксованого положення на великих екранах */
+.input__field-container.md\:fixed {
+  position: fixed;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  background: transparent;
+}
+
+/* Оновлюємо стилі для chat-active стану */
+.chat-active {
+  padding-bottom: 100px;
+}
+
+@media (min-width: 768px) {
+  .chat-active {
+    padding-bottom: 120px;
   }
 }
 </style>
