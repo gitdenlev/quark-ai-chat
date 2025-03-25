@@ -2,8 +2,11 @@
   <Header />
 
   <main
-    class="flex flex-col justify-center items-center flex-1 text-center main-container p-4 transition-all duration-500"
-    :class="{ 'chat-active': showChatBox }"
+    class="flex flex-col items-center flex-1 text-center main-container p-4 transition-all duration-500"
+    :class="{
+      'justify-center': !showChatBox,
+      'chat-active justify-start': showChatBox,
+    }"
   >
     <!-- Заголовок та опис - зникають при активному чаті -->
     <h1
@@ -59,8 +62,39 @@
     <div
       class="input-section w-full flex flex-col items-center justify-between md:justify-center"
     >
+      <!-- Поле введення тексту -->
+      <div
+        class="input__field-container fixed bottom-5 left-0 right-0 md:relative md:bottom-auto mx-auto"
+        :class="{
+          'w-full md:w-2/3': !showChatBox,
+          'w-full md:w-full lg:w-2/3 xl:w-2/3 2xl:w-1/3 md:fixed md:bottom-5': showChatBox,
+        }"
+      >
+        <div class="input__field w-full xl:w-[500px] md:w-[600px] mx-auto">
+          <textarea
+            class="text-md md:text-lg"
+            id="userInput"
+            :placeholder="t('home__placeholder')"
+            rows="1"
+            v-model="inputValue"
+            @keydown="handleKeyDown"
+            @input="autoResize"
+            ref="textarea"
+          ></textarea>
+          <button
+            class="button w-8 h-8 md:w-8 md:h-8"
+            :class="{ 'button--disabled': !isActive }"
+            :disabled="!isActive"
+            @click="sendMessage"
+            aria-label="Send message"
+          >
+            <Icon name="mingcute:ai-fill" size="25" />
+          </button>
+        </div>
+      </div>
+
       <!-- Бейджі можливостей -->
-      <div v-if="!showChatBox" class="w-full max-w-4xl mx-auto mb-20 md:mb-0">
+      <div v-if="!showChatBox">
         <!-- Випадаючий список для мобільних пристроїв -->
         <div class="block md:hidden w-full px-4">
           <div class="mobile-badges-container">
@@ -107,7 +141,7 @@
         <!-- Десктопні бейджі - тепер з умовою відображення -->
         <div class="hidden md:block">
           <div
-            class="flex items-center justify-center gap-5 w-full flex-wrap mt-6 xl:w-s xl:px-4 md:mx-auto"
+            class="flex items-start justify-start gap-3 w-2/3 flex-wrap mt-6 ml-40"
           >
             <QuarkBadge
               v-for="badge in badges"
@@ -119,34 +153,6 @@
               {{ t(badge.translationKey) }}
             </QuarkBadge>
           </div>
-        </div>
-      </div>
-
-      <!-- Поле введення тексту -->
-      <div
-        class="input__field-container fixed bottom-5 left-0 right-0 md:relative md:bottom-auto w-full lg:w-2/3 xl:w-1/2 mx-auto"
-        :class="{ 'md:fixed md:bottom-5': showChatBox }"
-      >
-        <div class="input__field w-full xl:w-[500px] md:w-[600px] mx-auto">
-          <textarea
-            class="text-md md:text-lg"
-            id="userInput"
-            :placeholder="t('home__placeholder')"
-            rows="1"
-            v-model="inputValue"
-            @keydown="handleKeyDown"
-            @input="autoResize"
-            ref="textarea"
-          ></textarea>
-          <button
-            class="button w-8 h-8 md:w-8 md:h-8"
-            :class="{ 'button--disabled': !isActive }"
-            :disabled="!isActive"
-            @click="sendMessage"
-            aria-label="Send message"
-          >
-            <Icon name="ri:apps-2-ai-line" size="25" />
-          </button>
         </div>
       </div>
     </div>
@@ -171,6 +177,7 @@ useHead({
   ],
   link: [{ rel: "icon", type: "image/x-icon", href: "/logo.svg" }],
 });
+
 
 const { t } = useI18n();
 const inputValue = ref("");
@@ -401,8 +408,6 @@ html {
   height: auto;
 }
 
-
-
 .chat-container::-webkit-scrollbar-thumb {
   background-color: rgba(255, 255, 255, 0.2);
   border-radius: 3px;
@@ -414,8 +419,6 @@ html {
   transform: translateY(0);
   animation: slideIn 0.5s forwards;
   position: relative;
-  margin-top: 20px;
-  margin-bottom: 90px;
 }
 
 .chat-hidden {
@@ -429,7 +432,7 @@ html {
   justify-content: center;
   transition: all 0.5s ease;
   z-index: 100;
-  padding: 0 10px;  
+  padding: 0 10px;
 }
 
 .input__field {
@@ -444,7 +447,6 @@ html {
   border: 2px solid rgba(255, 255, 255, 0.1);
   width: 100%;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-
 }
 
 .input__field:focus-within {
@@ -493,6 +495,8 @@ textarea::placeholder {
 }
 
 .button {
+  position: fixed;
+  right: 10px;
   border-radius: 50%;
   background-color: #a65fff;
   color: #fff;
@@ -558,18 +562,24 @@ textarea::placeholder {
   display: flex;
   align-items: flex-start;
   padding: 12px 16px;
-  border-radius: 18px;
+  border-radius: 30px;
   word-break: break-word;
 }
 
 .message-text {
   line-height: 1.5;
   text-align: left;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 640px) {
+  .message-text {
+    font-size: 0.95rem; /* Зменшений розмір тексту для маленьких екранів */
+  }
 }
 
 .user .message-content {
   background-color: #8c45ff;
-  border-top-right-radius: 4px;
   justify-content: flex-end;
 }
 

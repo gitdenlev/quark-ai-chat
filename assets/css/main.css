@@ -6,15 +6,19 @@
 }
 
 body {
-  background-color: #191919;
-  color: #fff;
+  background-color: #faf9f7;
+  color: #191919;
   font-weight: 400;
   display: flex;
   flex-direction: column;
   height: 100vh;
+  transition: none;
+  will-change: background-color, color;
 }
 
-.light-mode body {
-  background-color: #faf9f7;
-  color: #191919;
+.dark-mode body {
+  background-color: #191919;
+  color: #faf9f7;
 }
+
+
