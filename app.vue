@@ -26,7 +26,7 @@
     <div
       id="chatBox"
       ref="chatBox"
-      class="w-full md:w-[600px] chat-container transition-all duration-500 overflow-y-auto"
+      class="w-full md:w-[70%] chat-container transition-all duration-500 overflow-y-auto"
       :class="{ 'chat-visible': showChatBox, 'chat-hidden': !showChatBox }"
     >
       <div class="chat-messages-wrapper">
@@ -67,7 +67,7 @@
         class="input__field-container fixed bottom-5 left-0 right-0 md:relative md:bottom-auto mx-auto"
         :class="{
           'w-full md:w-2/3': !showChatBox,
-          'w-full md:w-full lg:w-2/3 xl:w-2/3 2xl:w-1/3 md:fixed md:bottom-5': showChatBox,
+          'w-full lg:w-[45%] md:fixed md:bottom-5': showChatBox,
         }"
       >
         <div class="input__field w-full xl:w-[500px] md:w-[600px] mx-auto">
@@ -178,7 +178,6 @@ useHead({
   link: [{ rel: "icon", type: "image/x-icon", href: "/logo.svg" }],
 });
 
-
 const { t } = useI18n();
 const inputValue = ref("");
 const showChatBox = ref(false);
@@ -196,12 +195,6 @@ const isActive = computed(() => inputValue.value.trim() !== "");
 
 const badges = [
   {
-    color: "oklch(0.488 0.243 264.376)",
-    bgColor: "oklch(0.932 0.032 255.585)",
-    iconName: "tabler:language",
-    translationKey: "translate__badge",
-  },
-  {
     color: "oklch(0.491 0.27 292.581)",
     bgColor: "oklch(0.943 0.029 294.588)",
     iconName: "fluent:line-style-sketch-16-filled",
@@ -213,6 +206,7 @@ const badges = [
     iconName: "majesticons:edit-pen-4-line",
     translationKey: "generation__badge",
   },
+  
   {
     color: "oklch(0.554 0.135 66.442)",
     bgColor: "oklch(0.973 0.071 103.193)",
@@ -384,10 +378,6 @@ html {
   overflow-x: hidden;
 }
 
-.chat-active {
-  padding-bottom: 100px;
-}
-
 .input-section {
   position: relative;
   z-index: 20;
@@ -397,10 +387,8 @@ html {
 
 .chat-container {
   border-radius: 16px;
-  scrollbar-width: thin;
-  position: relative;
+  /* position: relative; */
   height: auto;
-  width: 100%;
 }
 
 .chat-messages-wrapper {
@@ -562,7 +550,7 @@ textarea::placeholder {
   display: flex;
   align-items: flex-start;
   padding: 12px 16px;
-  border-radius: 30px;
+  border-radius: 20px 5px 20px 20px;
   word-break: break-word;
 }
 
@@ -763,15 +751,19 @@ textarea::placeholder {
     padding: 2px 4px;
     border-radius: 4px;
     font-family: monospace;
+    white-space: pre-wrap; /* Додаємо для переносу рядків */
+    overflow-wrap: break-word; /* Додаємо для переносу рядків */
   }
 
   pre {
     background-color: #282c34;
     padding: 1em;
     border-radius: 8px;
-    overflow-x: auto;
+    overflow-x: auto; /* Дозволяємо горизонтальний скролл */
     margin: 1em 0;
     color: #ffffff;
+    white-space: pre; /* Зберігаємо пробіли та переноси рядків */
+    overflow-wrap: normal; /* Вимикаємо переноси рядків */
   }
 
   ul,

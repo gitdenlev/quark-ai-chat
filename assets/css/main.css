@@ -14,11 +14,21 @@ body {
   height: 100vh;
   transition: none;
   will-change: background-color, color;
+  background-image:
+    radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px),
+    radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px; /* Розмір "зерна" піску */
+  background-position: 0 0, 10px 10px; /* Зміщення другого шару для більшої випадковості */
 }
 
 .dark-mode body {
   background-color: #191919;
   color: #faf9f7;
+   background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    radial-gradient(circle, rgba(0,0,0,0.05) 1px, transparent 1px);
+  background-size: 20px 20px; /* Розмір "зерна" піску */
+  background-position: 0 0, 10px 10px; /* Зміщення другого шару для більшої випадковості */
 }
 
 

@@ -7,6 +7,7 @@ const { setLocale, locale } = useI18n();
 
 const savedLocale = nuxtStorage.localStorage.getData("selectedLocale");
 const selectedLocale = ref(savedLocale || locale.value);
+const isModalOpen = ref(false);
 
 if (savedLocale) {
   setLocale(savedLocale);
@@ -36,6 +37,8 @@ const changeLocale = (newLocale: string) => {
   selectedLocale.value = newLocale;
 
   nuxtStorage.localStorage.setData("selectedLocale", newLocale, 24, "h");
+
+  isModalOpen.value = false;
 };
 </script>
 
@@ -101,7 +104,7 @@ const changeLocale = (newLocale: string) => {
             <div
               class="flex items-center justify-between gap-2 bg-transparent hover:bg-gray-100 rounded-md transition-all duration-200 cursor-pointer mt-2 select-none"
             >
-              <UModal>
+              <UModal v-model:open="isModalOpen">
                 <div
                   class="relative flex items-center gap-2 rounded-3xl p-2 w-full text-indigo-700"
                 >
@@ -118,7 +121,7 @@ const changeLocale = (newLocale: string) => {
                       :class="{ 'active-locale': selectedLocale === 'en' }"
                     >
                       <span class="flex items-center gap-2 font-[300]"
-                        ><Icon name="circle-flags:uk" />English</span
+                        >English</span
                       >
                       <span class="text-gray-700">English</span>
                     </div>
@@ -128,9 +131,7 @@ const changeLocale = (newLocale: string) => {
                       class="flex items-center justify-between text-black hover:bg-gray-100 p-2 rounded-md select-none cursor-pointer"
                       :class="{ 'active-locale': selectedLocale === 'uk' }"
                     >
-                      <span class="flex items-center gap-2"
-                        ><Icon name="circle-flags:lang-uk" />Українська</span
-                      >
+                      <span class="flex items-center gap-2">Українська</span>
                       <span class="text-gray-700">Ukrainian</span>
                     </div>
                   </div>
@@ -151,7 +152,7 @@ const changeLocale = (newLocale: string) => {
   left: 0;
   right: 0;
   z-index: 1000;
-  backdrop-filter: blur(8px);
+  /* backdrop-filter: blur(5px); */
 }
 
 .header-content {
